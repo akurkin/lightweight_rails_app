@@ -1,11 +1,11 @@
 # https://gist.github.com/madzhuga/4875c98eea03811d1611
 #
-# Using minimal rails application using rackup
+# Using minimal rails application with unicorn
 # Rails 4.2.3
 # ruby 2.2
 #
 # Start:
-#   bundle exec RAILS_ENV=production rackup -p 3000 -s thin
+#   unicorn -p 3000
 #
 # And open:
 #
@@ -73,14 +73,19 @@ class QuotesController < ActionController::Metal
 end
 
 class Quote < ActiveRecord::Base
+  validates :quote, :author, presence: true
+  validates :quote, uniqueness: true
+
   scope :random, -> { order('rand()') }
 end
 
 QuoteOfTheDay.initialize!
 
-puts '>> Starting Rails lightweight stack'
-Rails.configuration.middleware.each do |middleware|
-  puts "use #{middleware.inspect}"
-end
+unless Rails.env.test?
+  puts '>> Launching Rails lightweight stack'
+  Rails.configuration.middleware.each do |middleware|
+    puts "use #{middleware.inspect}"
+  end
 
-puts "run #{Rails.application.class.name}.routes"
+  puts "run #{Rails.application.class.name}.routes"
+end
