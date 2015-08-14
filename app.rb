@@ -2,14 +2,14 @@
 #
 # Using minimal rails application using rackup
 # Rails 4.2.3
-# ruby 2.1
+# ruby 2.2
 #
 # Start:
 #   bundle exec RAILS_ENV=production rackup -p 3000 -s thin
 #
 # And open:
 #
-#   http://localhost:3000/hello/world
+#   http://localhost:3000/
 #
 
 require 'mysql2'
@@ -22,7 +22,9 @@ require 'active_record/tasks/mysql_database_tasks'
 require 'socket'
 
 DB_DIR = File.expand_path('../db', __FILE__)
-DB_CONFIG = YAML.load(File.read(File.join(DB_DIR, 'database.yml')))
+
+db_yml = ERB.new(File.read(File.join(DB_DIR, 'database.yml'))).result
+DB_CONFIG = YAML.load(db_yml)
 
 ActiveRecord::Base.establish_connection(DB_CONFIG[Rails.env])
 

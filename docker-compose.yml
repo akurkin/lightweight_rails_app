@@ -1,0 +1,21 @@
+data:
+  image: "busybox"
+  volumes:
+    - /var/lib/mysql
+db:
+  image: "mysql:latest"
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+  volumes_from:
+    - data
+web:
+  build: ./
+  command: bundle exec unicorn -p 3000
+  environment:
+    RAILS_ENV: production
+  volumes:
+    - /usr/src/app
+  ports:
+    - 3000
+  links:
+    - db

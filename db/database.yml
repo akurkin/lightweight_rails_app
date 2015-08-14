@@ -5,6 +5,8 @@ default: &default
   username: root
   password: root
   reconnect: true
+  host: <%= ENV['DB_PORT_3306_TCP_ADDR'] || 'localhost' %>
+  port: <%= ENV['DB_PORT_3306_TCP_PORT'] || 'localhost' %>
 
 development:
   <<: *default
