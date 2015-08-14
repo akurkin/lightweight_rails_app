@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quote of the day - minimal rails app</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/base-min.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
+    <style type="text/css">
+      /*
+       * -- BASE STYLES --
+       * Most of these are inherited from Base, but I want to change a few.
+       */
+      body {
+        color: #7f8c8d;
+        font-size: 14px;
+        background: #1f8dd6;
+      }
+
+      h1 {
+        color: #34495e;
+      }
+
+      .splash {
+        width: 80%;
+        height: 50%;
+        margin: auto;
+        position: absolute;
+        top: 100px; left: 0; bottom: 0; right: 0;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .splash-head {
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        border: 3px solid white;
+        padding: 1em 1.6em;
+        font-weight: 100;
+        border-radius: 5px;
+        line-height: 1.35em;
+      }
+
+      .splash-subhead {
+        color: white;
+        letter-spacing: 0.05em;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+<body>
+
+<%= yield %>
+
+</body>
+</html>
