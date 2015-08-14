@@ -2,11 +2,11 @@ default: &default
   adapter: mysql2
   encoding: utf8
   pool: 5
-  username: root
-  password: root
+  username: <%= ENV['MYSQL_USERNAME'] || 'root' %>
+  password: <%= ENV['MYSQL_PASSWORD'] || 'root' %>
   reconnect: true
   host: <%= ENV['DB_PORT_3306_TCP_ADDR'] || 'localhost' %>
-  port: <%= ENV['DB_PORT_3306_TCP_PORT'] || 'localhost' %>
+  port: <%= ENV['DB_PORT_3306_TCP_PORT'] || 3306 %>
 
 development:
   <<: *default
@@ -18,4 +18,4 @@ test:
 
 production:
   <<: *default
-  database: quotes_integration
+  database: <%= ENV['MYSQL_DATABASE'] || 'quotes_integration' %>
