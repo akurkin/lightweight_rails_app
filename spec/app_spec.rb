@@ -6,7 +6,7 @@ describe QuotesController, type: :controller do
       Quote.delete_all
     end
 
-    let!(:quote){ Quote.create!(quote: 'Test quote', author: 'Rspec') }
+    let!(:quote) { Quote.create!(quote: 'Test quote', author: 'Rspec') }
 
     before do
       get :index

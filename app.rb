@@ -54,6 +54,8 @@ class QuoteOfTheDay < Rails::Application
   config.secret_token = '7d4eb05bc624d065ad2addf2cd4143ed'
   config.secret_key_base = 'hola'
   config.eager_load = true
+
+  config.paths['app/views'] << 'views'
 end
 
 class QuotesController < ActionController::Metal
