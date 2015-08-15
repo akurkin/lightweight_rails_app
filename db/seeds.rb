@@ -54,6 +54,46 @@ quotes = [
   [
     "I am thankful for all of those who said 'no' to me. Its because of them I'm doing it myself.",
     'Albert Einstein'
+  ],
+  [
+    "It doesn't make sense to hire smart people and then tell them what to do; we hire smart people so they can tell us what to do.",
+    'Steve Jobs'
+  ],
+  [
+    'A successful business, at its core, is thousands of small decisions made correctly.',
+    'Mitchell Harper, Co-founder of Bigcommerce'
+  ],
+  [
+    'Progress, not perfection.',
+    'Lauris Liberts, Draugiem Group'
+  ],
+  [
+    'Be undeniably good. No marketing effort or social media buzzword can be a substitute for that.',
+    'Anthony Volodkin, founder of Hype Machine'
+  ],
+  [
+    'Success is how well you do what you do when nobody else is looking.',
+    'John Paul DeJoria'
+  ],
+  [
+    "A brilliant idea doesn't guarantee a successful invention. Real magic comes from a brilliant idea combined with willpower, tenacity, and a willingness to make mistakes.",
+    'Lori Greiner'
+  ],
+  [
+    "Lots of companies don't succeed over time. What do they fundamentally do wrong? They usually miss the future.",
+    'Larry Page, CEO of Google'
+  ],
+  [
+    'Price is what you pay. Value is what you get.',
+    'Warren Buffett '
+  ],
+  [
+    "Doing something that doesn't end up working > Not doing something because of the fear it won't work.",
+    'Aaron Levie, Box.net'
+  ],
+  [
+    'The best new ideas live at the boundary between the real world and software.',
+    "Adam MacBeth, hardware specialist, shaped the iPod and Jawbone's wristbands"
   ]
 ]
 
