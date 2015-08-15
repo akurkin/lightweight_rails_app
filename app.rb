@@ -86,8 +86,6 @@ QuoteOfTheDay.initialize!
 unless Rails.env.test?
   puts '>> Launching Rails lightweight stack'
   Rails.configuration.middleware.each do |middleware|
-    puts "use #{middleware.inspect}"
+    puts "Using #{middleware.inspect}"
   end
-
-  puts "run #{Rails.application.class.name}.routes"
 end

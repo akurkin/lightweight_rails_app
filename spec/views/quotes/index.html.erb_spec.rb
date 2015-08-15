@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe 'quotes/index', type: :view do
-
   before do
     @quote = Quote.new(quote: 'Test quote', author: 'Rspec')
   end
