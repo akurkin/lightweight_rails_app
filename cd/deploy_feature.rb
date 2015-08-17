@@ -1,7 +1,6 @@
 # Objectives of this script is to:
 # - check if docker host for branch exists (using labels)
 # - create docker host via Rancher if it doesn't exist
-# - 
 # - build docker-compose.yml file for services with scheduling policy
 #   by label for branch
 #
@@ -19,13 +18,14 @@ RANCHER_BASE_URL = "http://#{RANCHER_ACCESS_KEY}:#{RANCHER_SECRET_KEY}@#{RANCHER
 DIGITAL_OCEAN_ACCESS_TOKEN = ENV['DIGITAL_OCEAN_ACCESS_TOKEN']
 BRANCH = ENV['CIRCLE_BRANCH']
 
-STACK_NAME = "quotes-#{BRANCH}"
 
 JIRA_CARD = if BRANCH =~ /feature_(.*)/
   $1.to_s
 else
   ''
 end
+
+STACK_NAME = "quotes-#{JIRA_CARD}"
 
 def full_url(path)
   RANCHER_BASE_URL + path
@@ -102,6 +102,9 @@ else
 
   web_service = prod_yaml['web']
   web_service['image'] = new_image_tag
+  web_service['labels'] = {
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+  }
   prod_yaml[new_web_name] = web_service
 
   File.open('docker-compose.feature.yml', 'w') { |f| f << prod_yaml.to_yaml }
