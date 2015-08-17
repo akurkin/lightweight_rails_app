@@ -11,4 +11,4 @@ test:
     - docker-compose -f docker-compose.development.yml run web rspec
 database:
   override:
-   - 'skipping db setup'
+   - echo 'skipping db setup'
