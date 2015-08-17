@@ -10,6 +10,20 @@ test:
   override:
     - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rake db:create db:migrate
     - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rspec
+
 database:
   override:
-   - echo 'skipping db setup'
+   - echo 'skipping database step'
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - docker build -t hub.howtocookmicroservices.com:5000/quotes:latest .
+      - docker push hub.howtocookmicroservices.com:5000/quotes:latest
+      # - ./cd/deploy_production.sh
+
+  # feature:
+  #   branch: /feature_.*/
+  #   commands:
+  #     - ./cd/deploy_feature.sh
