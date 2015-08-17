@@ -1,0 +1,11 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - sudo pip install --upgrade docker-compose
+
+test:
+  override:
+    - docker-compose -f docker-compose.development.yml run web rspec
