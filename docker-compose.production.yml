@@ -1,0 +1,19 @@
+#
+# MySQL
+#
+db:
+  image: 'mysql:latest'
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+#
+# Rails app
+#
+web:
+  image: 'hub.howtocookmicroservices.com:5000/quotes:latest'
+  command: 'bundle exec unicorn -p 3000'
+  environment:
+    RAILS_ENV: production
+  ports:
+    - '3000'
+  links:
+    - db
