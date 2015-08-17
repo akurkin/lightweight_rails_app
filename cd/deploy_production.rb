@@ -24,7 +24,7 @@ puts "PRODUCTION ENVIRONMENT ID: #{production_environment_id}"
 body = RestClient.get(full_url('/v1/projects/1a5/services'))
 data = JSON.parse(body)['data']
 
-old_web = data.find { |x| x['type'] == 'service' && x['environmentId'] == production_environment_id && x['name'] =~ /web/ }
+old_web = data.select { |x| x['type'] == 'service' && x['environmentId'] == production_environment_id && x['name'] =~ /web/ }.last
 old_web_name = old_web['name']
 
 short_commit = `git rev-parse --short=4 $CIRCLE_SHA1`.chomp
@@ -39,4 +39,11 @@ prod_yaml[new_web_name] = web_service
 
 File.open('docker-compose.upgrade.yml', 'w') { |f| f << prod_yaml.to_yaml }
 
-`rancher-compose -p #{PRODUCTION_PROJECT_NAME} -f docker-compose.upgrade.yml upgrade #{old_web_name} #{new_web_name}`
+`rancher-compose -p #{PRODUCTION_PROJECT_NAME} -f docker-compose.upgrade.yml upgrade --wait #{old_web_name} #{new_web_name}`
+
+old_web_id = old_web['id']
+
+body = RestClient.post(full_url("/v1/projects/1a5/services/#{old_web_id}/?action=remove"), {}.to_json, content_type: :json, accept: :json)
+data = JSON.load(body)
+
+puts "SERVICE #{data['name']} has been removed #{data['state']}"
