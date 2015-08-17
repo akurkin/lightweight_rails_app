@@ -24,10 +24,11 @@ puts "PRODUCTION ENVIRONMENT ID: #{production_environment_id}"
 body = RestClient.get(full_url('/v1/projects/1a5/services'))
 data = JSON.parse(body)['data']
 
-old_web = data.find{|x| x['type'] == 'service' && x['environmentId'] == production_environment_id && x['name'] =~ /web/ }
+old_web = data.find { |x| x['type'] == 'service' && x['environmentId'] == production_environment_id && x['name'] =~ /web/ }
 old_web_name = old_web['name']
 
-new_web_name = "web#{ENV['CIRCLE_SHA1']}"
+short_commit = `git rev-parse --short=4 $CIRCLE_SHA1`.chomp
+new_web_name = "web#{short_commit}"
 
 puts "CURRENTLY RUNNING SERVICE IN PRODUCTION: #{old_web_name}"
 puts "UPGRADING TO #{new_web_name}"
