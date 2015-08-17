@@ -1,3 +1,7 @@
+# This script deploys particular code commit to the specific environment
+# and performs rolling upgrade in rancher.
+#
+
 require 'yaml'
 require 'json'
 require 'rest-client'

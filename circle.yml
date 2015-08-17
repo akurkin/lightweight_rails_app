@@ -28,7 +28,7 @@ deployment:
       - docker push hub.howtocookmicroservices.com:5000/quotes:latest
       - ruby cd/deploy_production.rb
 
-  # feature:
-  #   branch: /feature_.*/
-  #   commands:
-  #     - ./cd/deploy_feature.sh
+  feature:
+    branch: /feature\/.*/
+    commands:
+      - ruby cd/deploy_feature.rb
