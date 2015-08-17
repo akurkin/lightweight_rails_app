@@ -31,11 +31,11 @@ def full_url(path)
   RANCHER_BASE_URL + path
 end
 
-body = RestClient.get(full_url('/v1/projects/1a5/hosts/'))
+body = RestClient.get(full_url('/v1/projects/1a5/hosts'))
 all_machines = JSON.parse(body)['data']
 
 # 1. check if docker host exists
-machine = all_machines.find { |x| x['labels']['branch'] == BRANCH }
+machine = all_machines.find { |x| !x['labels'].nil? && x['labels']['branch'] == BRANCH }
 
 # 2. docker host doesn't exist, let's create one
 unless machine
