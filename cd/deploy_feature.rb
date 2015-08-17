@@ -58,14 +58,15 @@ unless machine
   body = RestClient.post(full_url(new_machine_path), json.to_json, content_type: :json, accept: :json)
   machine = JSON.parse(body)
   puts "CREATING NEW MACHINE: #{machine['id']} - #{machine['name']}"
+  puts 'Sleeping 45 seconds...'
 
   # Wait until machine is active, on Digital Ocean claim to be 55 seconds
-  Timeout.timeout(120) do
+  Timeout.timeout(240) do
     sleep 45
     data = {}
     i = 45
 
-    while !%w(active error).include? data['state'] do
+    while !%w(active error bootstrapping).include? data['state'] do
       sleep 5
 
       body = RestClient.get(full_url("/v1/projects/1a5/machines/#{machine['id']}"))
@@ -86,7 +87,7 @@ all_stacks = JSON.parse(body)['data']
 
 current_stack = all_stacks.find { |x| x['name'] == STACK_NAME }
 
-new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{BRANCH}"
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}"
 
 if current_stack
   # TO IMPLEMENT: perform rolling upgrade on subsequent commits to feature branch
