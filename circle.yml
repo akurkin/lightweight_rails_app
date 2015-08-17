@@ -8,7 +8,8 @@ dependencies:
 
 test:
   override:
-    - docker-compose -f docker-compose.development.yml run web rspec
+    - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test rake db:create
+    - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rspec
 database:
   override:
    - echo 'skipping db setup'
