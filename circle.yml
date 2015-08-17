@@ -1,8 +1,6 @@
 machine:
   services:
     - docker
-  pre:
-    - sudo curl -sSL https://get.docker.com/ | sh
 
 dependencies:
   override:
