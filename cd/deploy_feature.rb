@@ -18,8 +18,7 @@ RANCHER_BASE_URL = "http://#{RANCHER_ACCESS_KEY}:#{RANCHER_SECRET_KEY}@#{RANCHER
 DIGITAL_OCEAN_ACCESS_TOKEN = ENV['DIGITAL_OCEAN_ACCESS_TOKEN']
 BRANCH = ENV['CIRCLE_BRANCH']
 
-
-JIRA_CARD = if BRANCH =~ /feature_(.*)/
+JIRA_CARD = if BRANCH =~ /feature\/(.*)/
   $1.to_s
 else
   ''
@@ -43,7 +42,7 @@ unless machine
   new_machine_path = '/v1/projects/1a5/machines'
 
   json = {
-    'name' => BRANCH,
+    'name' => STACK_NAME,
     'digitaloceanConfig' => {
       'accessToken' => DIGITAL_OCEAN_ACCESS_TOKEN,
       'size' => '1gb',
@@ -62,14 +61,16 @@ unless machine
 
   # Wait until machine is active, on Digital Ocean claim to be 55 seconds
   Timeout.timeout(120) do
+    sleep 45
     data = {}
-    i = 0
+    i = 45
 
     while !%w(active error).include? data['state'] do
-      body = RestClient.get(full_url("/v1/projects/1a5/hosts/#{machine['id']}"))
+      sleep 5
+
+      body = RestClient.get(full_url("/v1/projects/1a5/machines/#{machine['id']}"))
       data = JSON.parse(body)
 
-      sleep 10
       i += 10
       puts "Waiting #{i} seconds ..."
     end
