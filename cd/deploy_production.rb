@@ -2,8 +2,6 @@ require 'yaml'
 require 'json'
 require 'rest-client'
 
-prod_yaml = YAML.load_file('docker-compose.production.yml')
-
 RANCHER_ACCESS_KEY = ENV['RANCHER_ACCESS_KEY']
 RANCHER_SECRET_KEY = ENV['RANCHER_SECRET_KEY']
 RANCHER_HOST = ENV['RANCHER_HOST']
@@ -33,7 +31,15 @@ new_web_name = "web#{short_commit}"
 puts "CURRENTLY RUNNING SERVICE IN PRODUCTION: #{old_web_name}"
 puts "UPGRADING TO #{new_web_name}"
 
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{short_commit}"
+`docker tag -f hub.howtocookmicroservices.com:5000/quotes:latest #{new_image_tag}`
+`docker push #{new_image_tag}`
+
+prod_yaml = YAML.load_file('docker-compose.production.yml')
+
 web_service = prod_yaml['web']
+web_service['image'] = new_image_tag
+
 prod_yaml[old_web_name] = web_service
 prod_yaml[new_web_name] = web_service
 
