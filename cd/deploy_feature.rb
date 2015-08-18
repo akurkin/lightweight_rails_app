@@ -109,6 +109,17 @@ else
   }
   prod_yaml[new_web_name] = web_service
 
+  # link new service to load balancer
+  prod_yaml['lb']['links'] = [new_web_name]
+  prod_yaml['lb']['labels'] = {
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+  }
+
+  prod_yaml['db']['labels'] = {
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+  }
+
+  prod_yaml.delete('web')
   File.open('docker-compose.feature.yml', 'w') { |f| f << prod_yaml.to_yaml }
 
   `rancher-compose -p #{STACK_NAME} -f docker-compose.feature.yml up -d`
