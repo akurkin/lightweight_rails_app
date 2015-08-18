@@ -6,6 +6,18 @@ db:
   environment:
     MYSQL_ROOT_PASSWORD: root
 #
+# Load-balancer
+#
+lb:
+  ports:
+  - 80:3000
+  restart: always
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+    - web
+  stdin_open: true
+#
 # Rails app
 #
 web:
