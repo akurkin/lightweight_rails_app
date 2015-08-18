@@ -87,7 +87,9 @@ all_stacks = JSON.parse(body)['data']
 
 current_stack = all_stacks.find { |x| x['name'] == STACK_NAME }
 
-new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}"
+short_commit = `git rev-parse --short=4 $CIRCLE_SHA1`.chomp
+
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}.#{short_commit}"
 
 if current_stack
   # TO IMPLEMENT: perform rolling upgrade on subsequent commits to feature branch
@@ -95,7 +97,6 @@ else
   `docker build -t #{new_image_tag} .`
   `docker push #{new_image_tag}`
 
-  short_commit = `git rev-parse --short=4 $CIRCLE_SHA1`.chomp
   new_web_name = "web#{short_commit}"
 
   puts "DEPLOYING SERVICE #{new_web_name}"
