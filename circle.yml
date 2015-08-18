@@ -6,6 +6,7 @@ dependencies:
   override:
     - sudo pip install --upgrade docker-compose==1.3.0
     - gem install rest-client
+    - gem install rancher-api
     - curl -L https://github.com/rancher/rancher-compose/releases/download/v0.2.5/rancher-compose-linux-386-v0.2.5.tar.gz > rancher-compose.tar.gz
     - tar -zxf rancher-compose.tar.gz
     - cp rancher-compose*/rancher-compose ~/bin/
@@ -24,9 +25,10 @@ deployment:
   production:
     branch: master
     commands:
+      - eval $(ruby cd/setup.rb)
       - docker build -t hub.howtocookmicroservices.com:5000/quotes:latest .
       - docker push hub.howtocookmicroservices.com:5000/quotes:latest
-      - ruby cd/deploy_production.rb
+      - ruby cd/deploy_production.v2.rb
 
   feature:
     branch: /feature\/.*/
