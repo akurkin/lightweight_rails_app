@@ -52,7 +52,7 @@ unless machine
   puts 'Going to wait 240 seconds...'
 
   # Wait until machine is active, on Digital Ocean claim to be 55 seconds
-  Timeout.timeout(240) do
+  Timeout.timeout(420) do
     i = 45
     puts "Waiting #{i} seconds..."
     sleep i
@@ -118,7 +118,7 @@ else
   all_stacks = project.environments.to_a
   current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
 
-  Timeout.timeout(240) do
+  Timeout.timeout(420) do
     i = 30
     puts "Waiting #{i} seconds..."
     sleep i
