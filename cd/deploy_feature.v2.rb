@@ -109,4 +109,29 @@ else
   File.open('docker-compose.feature.yml', 'w') { |f| f << prod_yaml.to_yaml }
 
   `rancher-compose -p #{CUSTOM_STACK_NAME} -f docker-compose.feature.yml up -d`
+
+  puts 'Going to wait 240 seconds for service...'
+
+  all_stacks = project.environments.to_a
+  current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
+
+  Timeout.timeout(240) do
+    i = 30
+    puts "Waiting #{i} seconds..."
+    sleep i
+
+    while current_stack.state != 'active'
+      puts current_stack.transitioningMessage
+      puts "Waiting #{i} seconds ..."
+
+      sleep i
+
+      current_stack = Rancher::Api::Environment.find(current_stack.id)
+    end
+  end
+
+  web_service = current_stack.services.select { |x| x.type == 'service' && x.name =~ /web/ }.last
+  container = web_service.instances.first
+  action = container.execute(['rake', 'db:create', 'db:schema:load', 'db:seed'])
+  puts action.response
 end
