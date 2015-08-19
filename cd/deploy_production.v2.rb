@@ -19,7 +19,7 @@ project = Rancher::Api::Project.all.to_a.first
 all_stacks = project.environments.to_a
 production_stack = all_stacks.select { |x| x.name == PRODUCTION_PROJECT_NAME }.first
 
-puts "PRODUCTION ENVIRONMENT ID: #{production_environment.id} - #{production_environment.name}"
+puts "PRODUCTION ENVIRONMENT ID: #{production_stack.id} - #{production_stack.name}"
 
 services = production_stack.services.to_a
 puts "FOUND #{services.size} services"
