@@ -5,14 +5,12 @@
 require 'yaml'
 require 'rancher/api'
 
-SHORT_COMMIT = ENV['CUSTOM_SHORT_COMMIT']
+require_relative 'setup'
 
-puts "DETERMINED SHORT_COMMIT as #{SHORT_COMMIT}"
-
-puts "DETERMINED CUSTOM_JIRA_CARD as #{ENV['CUSTOM_JIRA_CARD']}"
-puts "DETERMINED CUSTOM_BRANCH as #{ENV['CUSTOM_BRANCH']}"
-puts "DETERMINED CUSTOM_STACK_NAME as #{ENV['CUSTOM_STACK_NAME']}"
-puts "DETERMINED CUSTOM_SHORT_COMMIT as #{ENV['CUSTOM_SHORT_COMMIT']}"
+puts "DETERMINED CUSTOM_JIRA_CARD as #{CUSTOM_JIRA_CARD}"
+puts "DETERMINED CUSTOM_BRANCH as #{CUSTOM_BRANCH}"
+puts "DETERMINED CUSTOM_STACK_NAME as #{CUSTOM_STACK_NAME}"
+puts "DETERMINED CUSTOM_SHORT_COMMIT as #{CUSTOM_SHORT_COMMIT}"
 
 exit(0)
 Rancher::Api.configure do |config|
@@ -35,12 +33,12 @@ puts "FOUND #{services.size} services"
 old_web_service = services.select { |x| x.type == 'service' && x.name =~ /web/ }.last
 old_web_name = old_web_service.name
 
-new_web_name = "web#{SHORT_COMMIT}"
+new_web_name = "web#{CUSTOM_SHORT_COMMIT}"
 
 puts "CURRENTLY RUNNING #{old_web_name}"
 puts "UPGRADING TO #{new_web_name}"
 
-new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{SHORT_COMMIT}"
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{CUSTOM_SHORT_COMMIT}"
 `docker tag -f hub.howtocookmicroservices.com:5000/quotes:latest #{new_image_tag}`
 `docker push #{new_image_tag}`
 

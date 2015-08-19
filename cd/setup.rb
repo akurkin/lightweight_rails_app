@@ -14,7 +14,7 @@ stack_name = if jira_card != ''
 circle_commit = ENV['CIRCLE_SHA1']
 short_commit = `git rev-parse --short=4 #{circle_commit}`.chomp
 
-puts "export CUSTOM_JIRA_CARD=#{jira_card}"
-puts "export CUSTOM_BRANCH=#{branch}"
-puts "export CUSTOM_STACK_NAME=#{stack_name}"
-puts "export CUSTOM_SHORT_COMMIT=#{short_commit}"
+CUSTOM_JIRA_CARD = jira_card
+CUSTOM_BRANCH = branch
+CUSTOM_STACK_NAME = stack_name
+CUSTOM_SHORT_COMMIT = short_commit
