@@ -14,9 +14,8 @@ dependencies:
 
 test:
   override:
-    - echo 'skipping'
-    # - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rake db:create db:migrate
-    # - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rspec
+    - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rake db:create db:migrate
+    - docker-compose -f docker-compose.development.yml run -e RAILS_ENV=test web rspec
 
 database:
   override:

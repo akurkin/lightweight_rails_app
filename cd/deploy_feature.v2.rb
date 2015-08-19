@@ -42,7 +42,7 @@ unless machine
   )
 
   machine.labels = {
-    jira_card: JIRA_CARD,
+    jira_card: CUSTOM_JIRA_CARD,
     branch: CUSTOM_BRANCH
   }
 
@@ -74,7 +74,7 @@ end
 all_stacks = project.environments.to_a
 current_stack = all_stacks.select { |x| x.name == CUSTOM_STACK_NAME }.first
 
-new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}.#{CUSTOM_SHORT_COMMIT}"
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{CUSTOM_JIRA_CARD}.#{CUSTOM_SHORT_COMMIT}"
 
 if current_stack
   # TO IMPLEMENT: perform rolling upgrade on subsequent commits to feature branch
@@ -91,18 +91,18 @@ else
   web_service = prod_yaml['web']
   web_service['image'] = new_image_tag
   web_service['labels'] = {
-    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{CUSTOM_JIRA_CARD}"
   }
   prod_yaml[new_web_name] = web_service
 
   # link new service to load balancer
   prod_yaml['lb']['links'] = [new_web_name]
   prod_yaml['lb']['labels'] = {
-    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{CUSTOM_JIRA_CARD}"
   }
 
   prod_yaml['db']['labels'] = {
-    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{CUSTOM_JIRA_CARD}"
   }
 
   prod_yaml.delete('web')
