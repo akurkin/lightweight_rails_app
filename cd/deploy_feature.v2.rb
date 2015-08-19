@@ -82,7 +82,12 @@ new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{CUSTOM_JIRA_CARD}.
 if current_stack
   # TO IMPLEMENT: perform rolling upgrade on subsequent commits to feature branch
 else
+  puts 'Machine created'
+
+  puts "Building image #{new_image_tag}"
   `docker build -t #{new_image_tag} .`
+
+  puts "Pushing image #{new_image_tag}"
   `docker push #{new_image_tag}`
 
   new_web_name = "web#{CUSTOM_SHORT_COMMIT}"
@@ -115,16 +120,20 @@ else
 
   puts 'Going to wait 240 seconds for service...'
 
-  all_stacks = project.environments.to_a
-  current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
+  all_stacks = nil
+  current_stack = nil
 
   Timeout.timeout(420) do
     i = 30
     puts "Waiting #{i} seconds..."
     sleep i
 
+    project = Rancher::Api::Project.find(project.id)
+    all_stacks = project.environments.to_a
+    current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
+
     while current_stack.nil? || current_stack.state != 'active'
-      puts current_stack.transitioningMessage if current_stack
+      puts current_stack.transitioningMessage if current_stack && current_stack.transitioningMessage
 
       wait_time = 5
 
@@ -133,6 +142,7 @@ else
 
       sleep wait_time
 
+      project = Rancher::Api::Project.find(project.id)
       all_stacks = project.environments.to_a
       current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
     end
