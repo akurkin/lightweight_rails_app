@@ -12,7 +12,6 @@ puts "DETERMINED CUSTOM_BRANCH as #{CUSTOM_BRANCH}"
 puts "DETERMINED CUSTOM_STACK_NAME as #{CUSTOM_STACK_NAME}"
 puts "DETERMINED CUSTOM_SHORT_COMMIT as #{CUSTOM_SHORT_COMMIT}"
 
-exit(0)
 Rancher::Api.configure do |config|
   config.url = "http://#{ENV['RANCHER_HOST']}/v1/"
   config.access_key = ENV['RANCHER_ACCESS_KEY']
