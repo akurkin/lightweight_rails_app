@@ -33,4 +33,4 @@ deployment:
   feature:
     branch: /feature\/.*/
     commands:
-      - ruby cd/deploy_feature.rb
+      - ruby cd/deploy_feature.v2.rb

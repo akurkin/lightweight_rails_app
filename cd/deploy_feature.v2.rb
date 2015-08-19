@@ -6,39 +6,33 @@
 #
 
 require 'yaml'
-require 'json'
 require 'rancher/api'
 
-RANCHER_ACCESS_KEY = ENV['RANCHER_ACCESS_KEY']
-RANCHER_SECRET_KEY = ENV['RANCHER_SECRET_KEY']
-RANCHER_HOST = ENV['RANCHER_HOST']
+require_relative 'setup'
+
+puts "DETERMINED CUSTOM_JIRA_CARD as #{CUSTOM_JIRA_CARD}"
+puts "DETERMINED CUSTOM_BRANCH as #{CUSTOM_BRANCH}"
+puts "DETERMINED CUSTOM_STACK_NAME as #{CUSTOM_STACK_NAME}"
+puts "DETERMINED CUSTOM_SHORT_COMMIT as #{CUSTOM_SHORT_COMMIT}"
 
 DIGITAL_OCEAN_ACCESS_TOKEN = ENV['DIGITAL_OCEAN_ACCESS_TOKEN']
-BRANCH = ENV['CIRCLE_BRANCH']
-JIRA_CARD = if BRANCH =~ /feature\/(.*)/
-  $1.to_s
-else
-  ''
-end
-STACK_NAME = "quotes-#{JIRA_CARD}"
 
 Rancher::Api.configure do |config|
-  config.url = "http://#{RANCHER_HOST}/v1/"
-  config.access_key = RANCHER_ACCESS_KEY
-  config.secret_key = RANCHER_SECRET_KEY
+  config.url = "http://#{ENV['RANCHER_HOST']}/v1/"
+  config.access_key = ENV['RANCHER_ACCESS_KEY']
+  config.secret_key = ENV['RANCHER_SECRET_KEY']
 end
 
 project = Rancher::Api::Project.all.to_a.first
 all_machines = project.machines
 
 # 1. check if docker host exists
-machine = all_machines.select { |x| x.labels['branch'] == BRANCH }.first
+machine = all_machines.select { |x| x.labels['branch'] == CUSTOM_BRANCH }.first
 
 # 2. docker host doesn't exist, let's create one
 unless machine
-
   machine = project.machines.build
-  machine.name = STACK_NAME
+  machine.name = CUSTOM_STACK_NAME
   machine.driver = Rancher::Api::Machine::DIGITAL_OCEAN
   machine.driver_config = Rancher::Api::Machine::DriverConfig.new(
     accessToken: DIGITAL_OCEAN_ACCESS_TOKEN,
@@ -49,7 +43,7 @@ unless machine
 
   machine.labels = {
     jira_card: JIRA_CARD,
-    branch: BRANCH
+    branch: CUSTOM_BRANCH
   }
 
   machine.save
@@ -59,18 +53,16 @@ unless machine
 
   # Wait until machine is active, on Digital Ocean claim to be 55 seconds
   Timeout.timeout(240) do
-    sleep 45
-    data = {}
     i = 45
-    puts 'Waiting 45 seconds...'
+    puts "Waiting #{i} seconds..."
+    sleep i
 
-    while machine.transitioning == 'yes' do
+    while machine.transitioning == 'yes'
       puts machine.transitioningMessage
 
-      sleep i
-
-      machine = Rancher::Api::Machine.find(machine.id)
       puts "Waiting #{i} seconds ..."
+      sleep i
+      machine = Rancher::Api::Machine.find(machine.id)
     end
   end
 end
@@ -80,10 +72,9 @@ end
 #
 
 all_stacks = project.environments.to_a
-current_stack = all_stacks.select { |x| x.name == STACK_NAME }.first
+current_stack = all_stacks.select { |x| x.name == CUSTOM_STACK_NAME }.first
 
-short_commit = `git rev-parse --short=4 $CIRCLE_SHA1`.chomp
-new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}.#{short_commit}"
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}.#{CUSTOM_SHORT_COMMIT}"
 
 if current_stack
   # TO IMPLEMENT: perform rolling upgrade on subsequent commits to feature branch
@@ -91,7 +82,7 @@ else
   `docker build -t #{new_image_tag} .`
   `docker push #{new_image_tag}`
 
-  new_web_name = "web#{short_commit}"
+  new_web_name = "web#{CUSTOM_SHORT_COMMIT}"
 
   puts "DEPLOYING SERVICE #{new_web_name}"
 
@@ -117,5 +108,5 @@ else
   prod_yaml.delete('web')
   File.open('docker-compose.feature.yml', 'w') { |f| f << prod_yaml.to_yaml }
 
-  `rancher-compose -p #{STACK_NAME} -f docker-compose.feature.yml up -d`
+  `rancher-compose -p #{CUSTOM_STACK_NAME} -f docker-compose.feature.yml up -d`
 end
