@@ -58,10 +58,13 @@ unless machine
     sleep i
 
     while machine.transitioning == 'yes'
+      wait_time = 5
+
       puts machine.transitioningMessage
 
-      puts "Waiting #{i} seconds ..."
-      sleep i
+      i += wait_time
+      puts "Waiting total: #{i} seconds ..."
+      sleep wait_time
       machine = Rancher::Api::Machine.find(machine.id)
     end
   end
@@ -120,13 +123,18 @@ else
     puts "Waiting #{i} seconds..."
     sleep i
 
-    while current_stack.state != 'active'
-      puts current_stack.transitioningMessage
-      puts "Waiting #{i} seconds ..."
+    while current_stack.nil? || current_stack.state != 'active'
+      puts current_stack.transitioningMessage if current_stack
 
-      sleep i
+      wait_time = 5
 
-      current_stack = Rancher::Api::Environment.find(current_stack.id)
+      i += wait_time
+      puts "Waiting total: #{i} seconds ..."
+
+      sleep wait_time
+
+      all_stacks = project.environments.to_a
+      current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
     end
   end
 
