@@ -116,21 +116,21 @@ else
   prod_yaml.delete('web')
   File.open('docker-compose.feature.yml', 'w') { |f| f << prod_yaml.to_yaml }
 
+  # this command will return only when all services started up and active;
+  # pretty much right after this (we'll give 10 sec of delay)
+  # we can query our container to execute a command
+  #
   `rancher-compose -p #{CUSTOM_STACK_NAME} -f docker-compose.feature.yml up -d`
 
-  puts 'Going to wait 240 seconds for service...'
+  puts 'Reloading project to get latest stacks'
 
-  all_stacks = nil
-  current_stack = nil
+  # reload project to get latest stacks
+  project = Rancher::Api::Project.find(project.id)
+  all_stacks = project.environments.to_a
+  current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
 
-  Timeout.timeout(420) do
-    i = 30
-    puts "Waiting #{i} seconds..."
-    sleep i
-
-    project = Rancher::Api::Project.find(project.id)
-    all_stacks = project.environments.to_a
-    current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
+  Timeout.timeout(120) do
+    i = 0
 
     while current_stack.nil? || current_stack.state != 'active'
       puts current_stack.transitioningMessage if current_stack && current_stack.transitioningMessage
