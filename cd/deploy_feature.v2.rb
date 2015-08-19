@@ -6,39 +6,33 @@
 #
 
 require 'yaml'
-require 'json'
 require 'rancher/api'
 
-RANCHER_ACCESS_KEY = ENV['RANCHER_ACCESS_KEY']
-RANCHER_SECRET_KEY = ENV['RANCHER_SECRET_KEY']
-RANCHER_HOST = ENV['RANCHER_HOST']
+require_relative 'setup'
+
+puts "DETERMINED CUSTOM_JIRA_CARD as #{CUSTOM_JIRA_CARD}"
+puts "DETERMINED CUSTOM_BRANCH as #{CUSTOM_BRANCH}"
+puts "DETERMINED CUSTOM_STACK_NAME as #{CUSTOM_STACK_NAME}"
+puts "DETERMINED CUSTOM_SHORT_COMMIT as #{CUSTOM_SHORT_COMMIT}"
 
 DIGITAL_OCEAN_ACCESS_TOKEN = ENV['DIGITAL_OCEAN_ACCESS_TOKEN']
-BRANCH = ENV['CIRCLE_BRANCH']
-JIRA_CARD = if BRANCH =~ /feature\/(.*)/
-  $1.to_s
-else
-  ''
-end
-STACK_NAME = "quotes-#{JIRA_CARD}"
 
 Rancher::Api.configure do |config|
-  config.url = "http://#{RANCHER_HOST}/v1/"
-  config.access_key = RANCHER_ACCESS_KEY
-  config.secret_key = RANCHER_SECRET_KEY
+  config.url = "http://#{ENV['RANCHER_HOST']}/v1/"
+  config.access_key = ENV['RANCHER_ACCESS_KEY']
+  config.secret_key = ENV['RANCHER_SECRET_KEY']
 end
 
 project = Rancher::Api::Project.all.to_a.first
 all_machines = project.machines
 
 # 1. check if docker host exists
-machine = all_machines.select { |x| x.labels['branch'] == BRANCH }.first
+machine = all_machines.select { |x| x.labels['branch'] == CUSTOM_BRANCH }.first
 
 # 2. docker host doesn't exist, let's create one
 unless machine
-
   machine = project.machines.build
-  machine.name = STACK_NAME
+  machine.name = CUSTOM_STACK_NAME
   machine.driver = Rancher::Api::Machine::DIGITAL_OCEAN
   machine.driver_config = Rancher::Api::Machine::DriverConfig.new(
     accessToken: DIGITAL_OCEAN_ACCESS_TOKEN,
@@ -48,8 +42,8 @@ unless machine
   )
 
   machine.labels = {
-    jira_card: JIRA_CARD,
-    branch: BRANCH
+    jira_card: CUSTOM_JIRA_CARD,
+    branch: CUSTOM_BRANCH
   }
 
   machine.save
@@ -58,19 +52,20 @@ unless machine
   puts 'Going to wait 240 seconds...'
 
   # Wait until machine is active, on Digital Ocean claim to be 55 seconds
-  Timeout.timeout(240) do
-    sleep 45
-    data = {}
+  Timeout.timeout(420) do
     i = 45
-    puts 'Waiting 45 seconds...'
+    puts "Waiting #{i} seconds..."
+    sleep i
 
-    while machine.transitioning == 'yes' do
+    while machine.transitioning == 'yes'
+      wait_time = 5
+
       puts machine.transitioningMessage
 
-      sleep i
-
+      i += wait_time
+      puts "Waiting total: #{i} seconds ..."
+      sleep wait_time
       machine = Rancher::Api::Machine.find(machine.id)
-      puts "Waiting #{i} seconds ..."
     end
   end
 end
@@ -80,18 +75,22 @@ end
 #
 
 all_stacks = project.environments.to_a
-current_stack = all_stacks.select { |x| x.name == STACK_NAME }.first
+current_stack = all_stacks.select { |x| x.name == CUSTOM_STACK_NAME }.first
 
-short_commit = `git rev-parse --short=4 $CIRCLE_SHA1`.chomp
-new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{JIRA_CARD}.#{short_commit}"
+new_image_tag = "hub.howtocookmicroservices.com:5000/quotes:#{CUSTOM_JIRA_CARD}.#{CUSTOM_SHORT_COMMIT}"
 
 if current_stack
   # TO IMPLEMENT: perform rolling upgrade on subsequent commits to feature branch
 else
+  puts 'Machine created'
+
+  puts "Building image #{new_image_tag}"
   `docker build -t #{new_image_tag} .`
+
+  puts "Pushing image #{new_image_tag}"
   `docker push #{new_image_tag}`
 
-  new_web_name = "web#{short_commit}"
+  new_web_name = "web#{CUSTOM_SHORT_COMMIT}"
 
   puts "DEPLOYING SERVICE #{new_web_name}"
 
@@ -100,22 +99,57 @@ else
   web_service = prod_yaml['web']
   web_service['image'] = new_image_tag
   web_service['labels'] = {
-    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{CUSTOM_JIRA_CARD}"
   }
   prod_yaml[new_web_name] = web_service
 
   # link new service to load balancer
   prod_yaml['lb']['links'] = [new_web_name]
   prod_yaml['lb']['labels'] = {
-    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{CUSTOM_JIRA_CARD}"
   }
 
   prod_yaml['db']['labels'] = {
-    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{JIRA_CARD}"
+    'io.rancher.scheduler.affinity:host_label' => "jira_card=#{CUSTOM_JIRA_CARD}"
   }
 
   prod_yaml.delete('web')
   File.open('docker-compose.feature.yml', 'w') { |f| f << prod_yaml.to_yaml }
 
-  `rancher-compose -p #{STACK_NAME} -f docker-compose.feature.yml up -d`
+  # this command will return only when all services started up and active;
+  # pretty much right after this (we'll give 10 sec of delay)
+  # we can query our container to execute a command
+  #
+  `rancher-compose -p #{CUSTOM_STACK_NAME} -f docker-compose.feature.yml up -d`
+
+  puts 'Reloading project to get latest stacks'
+
+  # reload project to get latest stacks
+  project = Rancher::Api::Project.find(project.id)
+  all_stacks = project.environments.to_a
+  current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
+
+  Timeout.timeout(120) do
+    i = 0
+
+    while current_stack.nil? || current_stack.state != 'active'
+      puts current_stack.transitioningMessage if current_stack && current_stack.transitioningMessage
+
+      wait_time = 5
+
+      i += wait_time
+      puts "Waiting total: #{i} seconds ..."
+
+      sleep wait_time
+
+      project = Rancher::Api::Project.find(project.id)
+      all_stacks = project.environments.to_a
+      current_stack = all_stacks.select { |x| x.name.downcase == CUSTOM_STACK_NAME.downcase }.first
+    end
+  end
+
+  web_service = current_stack.services.select { |x| x.type == 'service' && x.name =~ /web/ }.last
+  container = web_service.instances.first
+  action = container.execute(['rake', 'db:create', 'db:schema:load', 'db:seed'])
+  puts action.response
 end
