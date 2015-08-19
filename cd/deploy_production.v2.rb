@@ -7,6 +7,9 @@ require 'rancher/api'
 
 SHORT_COMMIT = ENV['CUSTOM_SHORT_COMMIT']
 
+puts "DETERMINED SHORT_COMMIT as #{SHORT_COMMIT}"
+
+exit(0)
 Rancher::Api.configure do |config|
   config.url = "http://#{ENV['RANCHER_HOST']}/v1/"
   config.access_key = ENV['RANCHER_ACCESS_KEY']

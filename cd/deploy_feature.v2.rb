@@ -52,8 +52,6 @@ unless machine
     branch: BRANCH
   }
 
-  require 'byebug'; byebug
-
   machine.save
 
   puts "CREATING NEW MACHINE: #{machine.id} - #{machine.name}"

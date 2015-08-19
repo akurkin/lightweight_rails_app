@@ -25,9 +25,10 @@ deployment:
   production:
     branch: master
     commands:
+      - ruby cd/setup.rb
       - eval $(ruby cd/setup.rb)
-      - docker build -t hub.howtocookmicroservices.com:5000/quotes:latest .
-      - docker push hub.howtocookmicroservices.com:5000/quotes:latest
+      # - docker build -t hub.howtocookmicroservices.com:5000/quotes:latest .
+      # - docker push hub.howtocookmicroservices.com:5000/quotes:latest
       - ruby cd/deploy_production.v2.rb
 
   feature:
